@@ -22,9 +22,10 @@ func Getmailer(mail *email.SMTPConfig) {
 
 func StartServing() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost:9092",
-		"group.id":          "consumers",
-		"auto.offset.reset": "smallest"})
+		"bootstrap.servers":        "localhost:9092",
+		"group.id":                 "consumers",
+		"auto.offset.reset":        "smallest",
+		"allow.auto.create.topics": true})
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -64,5 +65,6 @@ func DeSerialize(raw []byte) (m protoreflect.ProtoMessage, err error) {
 	if err != nil {
 		return nil, err
 	}
+	
 	return &res, nil
 }
