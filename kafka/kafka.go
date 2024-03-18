@@ -1,16 +1,19 @@
 package kafka
 
 import (
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 
 	"github.com/akshay0074700747/email-service/email"
-	"github.com/akshay0074700747/proto-files-for-microservices/pb"
 	"github.com/confluentinc/confluent-kafka-go/kafka"
-	"google.golang.org/protobuf/proto"
-	"google.golang.org/protobuf/reflect/protoreflect"
 )
+
+type SendMail struct {
+	Email   string `json:"Email"`
+	Message string `json:"Message"`
+}
 
 var (
 	Mailer *email.SMTPConfig
@@ -23,16 +26,23 @@ func Getmailer(mail *email.SMTPConfig) {
 func StartServing() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
 		"bootstrap.servers":        "localhost:9092",
-		"group.id":                 "consumers",
-		"auto.offset.reset":        "smallest",
+		"group.id":                 "EmailConsumers",
+		"auto.offset.reset":        "earliest",
 		"allow.auto.create.topics": true})
 	if err != nil {
 		log.Fatal(err)
 	}
 	topic := "Emailsender"
-	err = consumer.Subscribe(topic, nil)
+	err = consumer.Assign([]kafka.TopicPartition{
+		{
+			Topic:     &topic,
+			Partition: 0,
+			Offset:    kafka.OffsetStored,
+		},
+	})
 	if err != nil {
 		fmt.Println(err)
+		return
 	}
 	for {
 		ev := consumer.Poll(10)
@@ -41,14 +51,14 @@ func StartServing() {
 			go func() {
 				log.Println(string(e.Value))
 				log.Println("above is the value")
-				deserialized, err := DeSerialize(e.Value)
+				var res SendMail
+				err := json.Unmarshal(e.Value, &res)
 				if err != nil {
 					log.Println(err)
 				}
 				log.Println("about to assert...")
-				res := deserialized.(*pb.Email)
 				fmt.Println(res)
-				if err = Mailer.SendMessage(res.GetReciever(), res.GetMessage()); err != nil {
+				if err = Mailer.SendMessage(res.Email, res.Message); err != nil {
 					log.Println(err)
 				}
 			}()
@@ -56,15 +66,4 @@ func StartServing() {
 			fmt.Fprintf(os.Stderr, "%% Error: %v\n", e)
 		}
 	}
-}
-
-func DeSerialize(raw []byte) (m protoreflect.ProtoMessage, err error) {
-
-	var res pb.Email
-	err = proto.Unmarshal(raw, &res)
-	if err != nil {
-		return nil, err
-	}
-	
-	return &res, nil
 }
