@@ -24,12 +24,12 @@ jobs:
 
       - name: Add env file to the runner just for copying the env variables to the container
         run: |
-         echo 'EMAIL=${{ secrets.EMAIL }}' > cmd/.env   
-         echo 'PASSWORD=${{ secrets.PASSWORD }}' >> cmd/.env
+         echo 'EMAIL=${{ secrets.EMAIL }}' > .env   
+         echo 'PASSWORD=${{ secrets.PASSWORD }}' >> .env
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v4
         with:
           context:  .
           push: true
-          tags: akshayhere999/project-and-company-management-email-service:v0.1.0
+          tags: akshayhere999/project-and-company-management-email-service:v0.1.1
