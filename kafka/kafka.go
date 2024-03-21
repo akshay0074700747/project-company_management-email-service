@@ -25,7 +25,7 @@ func Getmailer(mail *email.SMTPConfig) {
 
 func StartServing() {
 	consumer, err := kafka.NewConsumer(&kafka.ConfigMap{
-		"bootstrap.servers":        "localhost:9092",
+		"bootstrap.servers":        "host.docker.internal:9092",
 		"group.id":                 "EmailConsumers",
 		"auto.offset.reset":        "earliest",
 		"allow.auto.create.topics": true})
