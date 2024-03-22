@@ -27,7 +27,7 @@ func (config *SMTPConfig) SendMessage(recipient string, message string) error {
 	auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
 
 	err := smtp.SendMail(
-		"",
+		config.SMTPServer+":"+config.SMTPPort,
 		auth,
 		config.SMTPUsername,
 		[]string{recipient},
