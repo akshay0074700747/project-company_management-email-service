@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"log"
+	"time"
 
 	"github.com/IBM/sarama"
 	"github.com/akshay0074700747/email-service/email"
@@ -69,12 +70,21 @@ func StartServing() {
 	config.Consumer.Return.Errors = true
 	config.Metadata.AllowAutoTopicCreation = true
 	config.Consumer.Offsets.AutoCommit.Enable = true
-	consumer, err := sarama.NewConsumer([]string{"localhost:9092"}, config)
-	if err != nil {
-		log.Fatalf("Error creating consumer: %v", err)
-	}
-	defer consumer.Close()
 
+	var consumer sarama.Consumer
+	var err error
+	for i := 0; i < 8; i++ {
+		consumer, err = sarama.NewConsumer([]string{"host.docker.internal:29092"}, config)
+		if err != nil {
+			if i == 7 {
+				log.Fatal("Closingg: %v", err)
+			}
+			fmt.Println("Error creating consumer : ", i, ": %v", err)
+			time.Sleep(time.Second * 3)
+		} else {
+			break
+		}
+	}
 	partitionConsumer, err := consumer.ConsumePartition("Emailsender", 0, sarama.OffsetNewest)
 	if err != nil {
 		log.Fatalf("Error creating partition consumer: %v", err)
