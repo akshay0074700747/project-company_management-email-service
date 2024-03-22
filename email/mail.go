@@ -2,6 +2,7 @@ package email
 
 import (
 	"fmt"
+	"log"
 	"net/smtp"
 )
 
@@ -21,15 +22,23 @@ func NewMailer(smtpServer, smtpPort, smtpUsername, smtpPassword string) *SMTPCon
 	}
 }
 
-func (config *SMTPConfig) SendMessage(reciever string, message string) error {
-	// auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
-	auth := smtp.CRAMMD5Auth(config.SMTPUsername, config.SMTPPassword)
-	if err := smtp.SendMail(config.SMTPServer+":"+config.SMTPPort, auth, config.SMTPUsername, []string{reciever}, []byte(message)); err != nil {
-		fmt.Println(err.Error())
+func (config *SMTPConfig) SendMessage(recipient string, message string) error {
+
+	auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
+
+	err := smtp.SendMail(
+		"",
+		auth,
+		config.SMTPUsername,
+		[]string{recipient},
+		[]byte(message),
+	)
+
+	if err != nil {
+		log.Printf("Error sending email: %v\n", err)
 		return err
 	}
 
-	fmt.Println("email sent...")
-
+	fmt.Println("Email sent successfully!")
 	return nil
 }
