@@ -5,7 +5,6 @@ import (
 	"net/smtp"
 )
 
-
 type SMTPConfig struct {
 	SMTPServer   string
 	SMTPPort     string
@@ -13,19 +12,18 @@ type SMTPConfig struct {
 	SMTPPassword string
 }
 
-func NewMailer(smtpServer,smtpPort,smtpUsername,smtpPassword string) *SMTPConfig {
+func NewMailer(smtpServer, smtpPort, smtpUsername, smtpPassword string) *SMTPConfig {
 	return &SMTPConfig{
-		SMTPServer: smtpServer,
+		SMTPServer:   smtpServer,
 		SMTPPassword: smtpPassword,
 		SMTPUsername: smtpUsername,
-		SMTPPort: smtpPort,
+		SMTPPort:     smtpPort,
 	}
 }
 
-
-func (config *SMTPConfig) SendMessage(reciever string,message string) error {
-	auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
-
+func (config *SMTPConfig) SendMessage(reciever string, message string) error {
+	// auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
+	auth := smtp.CRAMMD5Auth(config.SMTPUsername, config.SMTPPassword)
 	if err := smtp.SendMail(config.SMTPServer+":"+config.SMTPPort, auth, config.SMTPUsername, []string{reciever}, []byte(message)); err != nil {
 		fmt.Println(err.Error())
 		return err
