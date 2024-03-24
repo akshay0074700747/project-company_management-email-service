@@ -74,7 +74,7 @@ func StartServing() {
 	var consumer sarama.Consumer
 	var err error
 	for i := 0; i < 8; i++ {
-		consumer, err = sarama.NewConsumer([]string{"host.docker.internal:29092"}, config)
+		consumer, err = sarama.NewConsumer([]string{"apache-kafka-service:29092"}, config)
 		if err != nil {
 			if i == 7 {
 				log.Fatal("Closingg: %v", err)
@@ -90,6 +90,8 @@ func StartServing() {
 		log.Fatalf("Error creating partition consumer: %v", err)
 	}
 	defer partitionConsumer.Close()
+
+	fmt.Println("Starting Notification-Service...")
 
 	for {
 		select {
