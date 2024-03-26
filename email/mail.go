@@ -1,8 +1,10 @@
 package email
 
 import (
+	"crypto/tls"
 	"fmt"
 	"log"
+	"net/http"
 	"net/smtp"
 )
 
@@ -23,6 +25,8 @@ func NewMailer(smtpServer, smtpPort, smtpUsername, smtpPassword string) *SMTPCon
 }
 
 func (config *SMTPConfig) SendMessage(recipient string, message string) error {
+
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 
 	auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
 
