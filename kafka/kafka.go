@@ -1,9 +1,11 @@
 package kafka
 
 import (
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/IBM/sarama"
@@ -71,6 +73,8 @@ func StartServing() {
 	config.Metadata.AllowAutoTopicCreation = true
 	config.Consumer.Offsets.AutoCommit.Enable = true
 
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
+
 	var consumer sarama.Consumer
 	var err error
 	for i := 0; i < 8; i++ {
@@ -106,6 +110,7 @@ func StartServing() {
 				}
 				log.Println("about to assert...")
 				fmt.Println(res)
+				http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 				if err = Mailer.SendMessage(res.Email, res.Message); err != nil {
 					log.Println(err)
 				}

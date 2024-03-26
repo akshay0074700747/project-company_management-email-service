@@ -16,6 +16,7 @@ type SMTPConfig struct {
 }
 
 func NewMailer(smtpServer, smtpPort, smtpUsername, smtpPassword string) *SMTPConfig {
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	return &SMTPConfig{
 		SMTPServer:   smtpServer,
 		SMTPPassword: smtpPassword,
@@ -30,6 +31,7 @@ func (config *SMTPConfig) SendMessage(recipient string, message string) error {
 
 	auth := smtp.PlainAuth("", config.SMTPUsername, config.SMTPPassword, config.SMTPServer)
 
+	http.DefaultTransport.(*http.Transport).TLSClientConfig = &tls.Config{InsecureSkipVerify: true}
 	err := smtp.SendMail(
 		config.SMTPServer+":"+config.SMTPPort,
 		auth,
